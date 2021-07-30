@@ -47,7 +47,6 @@ private:
 
 	// Loopy registers
 	uint16_t v;
-	uint16_t last_v;
 	uint16_t t;
 	uint8_t fine_x;
 

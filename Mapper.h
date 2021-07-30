@@ -3,17 +3,20 @@
 
 #include <cstdint>
 #include <vector>
+#include <fcntl.h>
+#include <unistd.h>
 //for debuging
 #include <iostream>
+
+#define SAVE_FILE_EXTENSION "save"
 
 class Mapper
 {
 public:
 	Mapper();
-	~Mapper();
 	virtual uint32_t getAddr(uint16_t addr) = 0;
 	virtual uint32_t getAddrCHR(uint16_t addr) = 0;
-	virtual void write(uint16_t addr, uint8_t data) = 0;
+	virtual void writeM(uint16_t addr, uint8_t data) = 0;
 	virtual int changesMirr() = 0;
 	virtual bool interrputs() = 0;
 	virtual void updateIrq() = 0;
@@ -30,24 +33,27 @@ public:
 	void updateIrq();
 	uint32_t getAddr(uint16_t addr);
 	uint32_t getAddrCHR(uint16_t addr);
-	void write(uint16_t addr, uint8_t data);
+	void writeM(uint16_t addr, uint8_t data);
 };
 
 class CMM1: public Mapper {
 private:
+	std::string filename;
 	bool state;
 	int prg_size, chr_size, seq_shift;
 	uint8_t cntrl, load, chr0, chr1, prg;
 	uint8_t memory[8*1024];
 public:
-	CMM1(int prg_size, int chr_size);
+	CMM1(int prg_size, int chr_size, std::string filename);
 	~CMM1();
 	int changesMirr();
 	bool interrputs();
 	void updateIrq();
 	uint32_t getAddr(uint16_t addr);
 	uint32_t getAddrCHR(uint16_t addr);
-	void write(uint16_t addr, uint8_t data);
+	void writeM(uint16_t addr, uint8_t data);
+	void loadSave();
+	void save();
 };
 
 class UxROM: public Mapper {
@@ -62,7 +68,7 @@ public:
 	void updateIrq();
 	uint32_t getAddr(uint16_t addr);
 	uint32_t getAddrCHR(uint16_t addr);
-	void write(uint16_t addr, uint8_t data);
+	void writeM(uint16_t addr, uint8_t data);
 };
 
 class CMM3: public Mapper {
@@ -80,7 +86,7 @@ public:
 	void updateIrq();
 	uint32_t getAddr(uint16_t addr);
 	uint32_t getAddrCHR(uint16_t addr);
-	void write(uint16_t addr, uint8_t data);
+	void writeM(uint16_t addr, uint8_t data);
 };
 
 class MP184: public Mapper {
@@ -95,7 +101,7 @@ public:
 	void updateIrq();
 	uint32_t getAddr(uint16_t addr);
 	uint32_t getAddrCHR(uint16_t addr);
-	void write(uint16_t addr, uint8_t data);
+	void writeM(uint16_t addr, uint8_t data);
 };
 
 #endif

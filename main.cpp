@@ -11,27 +11,7 @@ using namespace std;
 
 #define DW 256
 #define DH 240
-#define PS 4
-
-
-// float apsin(float v) {
-// 	float j = v * 0.15915;
-// 	j = j - (int)j;
-// 	return 20.785 * j * (j-0.5) * (j-1.0f);
-// }
-
-// // float apsin(float v) {
-// // 	return sin(v);
-// // }
-
-// // Audio sample generation
-// void generateSamples(long * v, Sint16 *stream, int length) {
-// 	// Using fourier square wave (somehow fitting for old computers)
-// 	for (int i = 0; i < length; i++) {
-// 		stream[i] = 0.5* AMPLITUDE * (4/PI) * (apsin(*v * 2 * PI / FREQUENCY) + 0.33333*apsin(*v * 6 * PI / FREQUENCY) + 0.2*apsin(*v * 10 * PI / FREQUENCY));
-// 		*v = (*v+392);
-// 	}
-// }
+#define PS 3
 
 // Giving samples for the audio stream
 void audio_callback(void *userdata, Uint8 *_stream, int _length)
@@ -108,5 +88,6 @@ int main(int argc, char const *argv[])
 			}
 		}
 	}
+	rom->save();
 	return 0;
 }

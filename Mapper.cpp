@@ -32,18 +32,20 @@ uint32_t MROM::getAddrCHR(uint16_t addr) {
 	return addr;
 }
 
-void MROM::write(uint16_t addr, uint8_t data) {
+void MROM::writeM(uint16_t addr, uint8_t data) {
 
 }
 
 // Mapper 1 -----------------------------------------
-CMM1::CMM1(int prg_size, int chr_size) {
+CMM1::CMM1(int prg_size, int chr_size, std::string filename) {
+	this->filename = filename;
 	this->state = false;
 	this->prg_size = prg_size;
 	this->chr_size = chr_size;
 	this->seq_shift = 0;
 	this->cntrl = 0x1C;
 	load = chr0 = chr1 = prg = 0x00;
+	loadSave();
 }
 int CMM1::changesMirr() {
 	//std::cout << "esto es lo que hay en ctrl" << (uint16_t)cntrl << std::endl;
@@ -105,7 +107,7 @@ uint32_t CMM1::getAddrCHR(uint16_t addr) {
 	return addr;
 }
 
-void CMM1::write(uint16_t addr, uint8_t data) {
+void CMM1::writeM(uint16_t addr, uint8_t data) {
 	if (addr >= 0x6000 && addr < 0x8000) {
 		memory[addr&0x1FFF] = data;
 	}
@@ -139,6 +141,22 @@ void CMM1::write(uint16_t addr, uint8_t data) {
 	}
 }
 
+void CMM1::save() {
+	std::string savename = filename + "." + SAVE_FILE_EXTENSION;
+	int file;
+	if ((file = open(savename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR)) < 0)
+		return;
+	write(file, memory, 8*1024);
+}
+
+void CMM1::loadSave() {
+	std::string savename = filename + "." + SAVE_FILE_EXTENSION;
+	int file;
+	if ((file = open(savename.c_str(), O_RDONLY)) < 0)
+		return;
+	read(file, memory, 8*1024);
+}
+
 // Mapper 2 ------------------------------------------
 UxROM::UxROM(int prg_size) {
 	this->prg_size = prg_size;
@@ -170,7 +188,7 @@ uint32_t UxROM::getAddrCHR(uint16_t addr) {
 	return addr;
 }
 
-void UxROM::write(uint16_t addr, uint8_t data) {
+void UxROM::writeM(uint16_t addr, uint8_t data) {
 	if (addr >= 0x8000)
 		this->bank_selected = data&0x0F;
 }
@@ -288,7 +306,7 @@ uint32_t CMM3::getAddrCHR(uint16_t addr) {
 	return addr;
 }
 
-void CMM3::write(uint16_t addr, uint8_t data) {
+void CMM3::writeM(uint16_t addr, uint8_t data) {
 	if (addr >= 0x6000 && addr < 0x8000) {
 		memory[addr&0x1FFF] = data;
 	}
@@ -364,7 +382,7 @@ uint32_t MP184::getAddrCHR(uint16_t addr) {
 	return addr;
 }
 
-void MP184::write(uint16_t addr, uint8_t data) {
+void MP184::writeM(uint16_t addr, uint8_t data) {
 	if (addr >= 0x6000 && addr <= 0x7FFF)
 		this->bank_selected = ((data & 0x77)|0x40);
 }

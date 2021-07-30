@@ -88,16 +88,10 @@ uint8_t PPU::reverseByte(uint8_t b) {
 }
 
 void PPU::setAtRegs() { // Check this is too much free style
-	int shift = (int)(((((last_v&0x001F) >> 1)&0x0001)) | (((last_v&0x03E0) >> 5)&0x0002));
-	last_v = v;
+	int shift = (int)(((((v&0x001F) >> 1)&0x0001)) | (((v&0x03E0) >> 5)&0x0002));
 	AT_latch = (AT_latch >> 2*shift)&0x03;
-	// if ((v&0x001F)&0x0002) AT_latch >>= 2;
-	// if ((v&0x03E0)&0x0004) AT_latch >>= 4;
 	at_reg_A = (at_reg_A&0xFF00) | ((AT_latch&0x01)*0xFF);
 	at_reg_B = (at_reg_B&0xFF00) | (((AT_latch&0x02)>>1)*0xFF);
-	// std::cout << "ciclo: " << std::dec << current_cycle << std::endl;
-	// std::cout << "Curse x: " << std::hex << (v&0x001F) << std::endl;
-	// std::cout << "la cosa: " << std::hex << (((v&0x001F) >> 1)&0x0001) << std::endl;
 }
 
 void PPU::setSprtPixel() {
@@ -180,7 +174,7 @@ void PPU::spritesFetch() {
 	for (int i = 0; (i < NUM_SPRITES_FRAME) && (j <= NUM_SPRITES); i++) {
 		sprt = i*4;
 		relpos = current_scanline - OAM[sprt];
-		if ((relpos >= 0) && (relpos <= ( 7 + ((PPUCTRL&0x20)>>5)*7 ))) {
+		if ((relpos >= 0) && (relpos <= ( 7 + ((PPUCTRL&0x20)>>5)*8 ))) {
 			if (i == 0) sprt_zero_loaded = true;
 			if (j == NUM_SPRITES) {
 				PPUSTATUS |= 0x20;
@@ -189,7 +183,7 @@ void PPU::spritesFetch() {
 			x_sprt[j] = OAM[sprt+3];
 			at_sprt[j] = OAM[sprt+2];
 			if ((at_sprt[j]&0x80)) {//vertical flip
-				relpos = ( 7 + ((PPUCTRL&0x20)>>5)*7 ) - relpos;
+				relpos = ( 7 + ((PPUCTRL&0x20)>>5)*8 ) - relpos;
 			}
 			if ((PPUCTRL&0x20)) { // 8x16 sprite mode
 				if (relpos < 8) {
@@ -197,8 +191,8 @@ void PPU::spritesFetch() {
 					msb_ptr_sprt[j] = readFrom(0x1000*(OAM[sprt+1]&0x01) + (OAM[sprt+1]&0xFE)*16 + relpos + 8);
 				}
 				else {
-					lsb_ptr_sprt[j] = readFrom(0x1000*(OAM[sprt+1]&0x01) + (OAM[sprt+1]&0xFE)*16 + 16 + (relpos-7));
-					msb_ptr_sprt[j] = readFrom(0x1000*(OAM[sprt+1]&0x01) + (OAM[sprt+1]&0xFE)*16 + 16 + (relpos-7) + 8);
+					lsb_ptr_sprt[j] = readFrom(0x1000*(OAM[sprt+1]&0x01) + (OAM[sprt+1]&0xFE)*16 + 16 + (relpos-8));
+					msb_ptr_sprt[j] = readFrom(0x1000*(OAM[sprt+1]&0x01) + (OAM[sprt+1]&0xFE)*16 + 16 + (relpos-8) + 8);
 				}
 			}
 			else { // 8x8 sprite mode
@@ -246,6 +240,21 @@ bool PPU::tick() {
 		}
 	}
 	if ((current_scanline >= -1) && (current_scanline <= 239)) {
+
+
+		if ((current_cycle >= 2 && current_cycle <= 257) || (current_cycle >= 322 && current_cycle <= 337)) {
+			msb_ptr_reg <<= 1;
+			lsb_ptr_reg <<= 1;
+			at_reg_A <<= 1;
+			at_reg_B <<= 1;
+			if (!(current_cycle%8)) {
+				msb_ptr_reg = (msb_ptr_reg&0xFF00) | highBG_latch;
+				lsb_ptr_reg = (lsb_ptr_reg&0xFF00) | lowBG_latch;
+				setAtRegs();
+			}
+		}
+
+
 		if ((current_cycle >= 321) || (current_cycle <= 256))
 			renderFetch();
 
@@ -260,18 +269,6 @@ bool PPU::tick() {
 			}
 			else
 			  v += 1;                // increment coarse X
-		}
-
-		if ((current_cycle >= 2 && current_cycle <= 257) || (current_cycle >= 322 && current_cycle <= 337)) {
-			msb_ptr_reg <<= 1;
-			lsb_ptr_reg <<= 1;
-			at_reg_A <<= 1;
-			at_reg_B <<= 1;
-			if (current_cycle%8 == 1) {
-				msb_ptr_reg = (msb_ptr_reg&0xFF00) | highBG_latch;
-				lsb_ptr_reg = (lsb_ptr_reg&0xFF00) | lowBG_latch;
-				setAtRegs();
-			}
 		}
 
 		if ((current_cycle == 257) && (PPUMASK&0x08)) 

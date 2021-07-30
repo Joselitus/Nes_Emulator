@@ -33,7 +33,7 @@ uint8_t ROM::readPRG(uint16_t addr) {
 }
 
 void ROM::writePRG(uint16_t addr, uint8_t data) {
-	mapper->write(addr, data);
+	mapper->writeM(addr, data);
 }
 
 bool ROM::parseHeader(uint8_t * buff) {
@@ -99,7 +99,13 @@ bool ROM::load(std::string filename) {
 }
 
 void ROM::reset() {
+	save();
 	load(filename);
+}
+
+void ROM::save() {
+	CMM1 * cmm1mapper = (CMM1*)mapper;
+	cmm1mapper->save();
 }
 
 void ROM::asignMapper() {
@@ -108,7 +114,7 @@ void ROM::asignMapper() {
 			mapper = new MROM(prg_size);
 		break;
 		case 1:
-			mapper = new CMM1(prg_size, has_chr);
+			mapper = new CMM1(prg_size, has_chr, filename);
 		break;
 		case 2:
 			mapper = new UxROM(prg_size);

@@ -45,6 +45,7 @@ public:
 	~ROM();
 
 	bool load(std::string filename);
+	void save();
 	void reset();
 	uint8_t readCHR(uint16_t addr);
 	uint8_t readPRG(uint16_t addr);
