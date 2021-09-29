@@ -11,7 +11,7 @@ using namespace std;
 
 #define DW 256
 #define DH 240
-#define PS 3
+#define PS 4
 
 // Giving samples for the audio stream
 void audio_callback(void *userdata, Uint8 *_stream, int _length)
@@ -83,6 +83,15 @@ int main(int argc, char const *argv[])
 				}
 				if ( e.type == SDL_JOYBUTTONUP) {
 					cim->handleJoyRelease(e);
+				}
+				if ( e.type == SDL_JOYAXISMOTION ) {
+					cim->handleJoyAxis(e);
+				}
+				if ( e.type == SDL_JOYDEVICEADDED ) {
+					cim->newController();
+				}
+				if ( e.type == SDL_JOYDEVICEREMOVED ) {
+					cim->closeController();
 				}
 
 			}

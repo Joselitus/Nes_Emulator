@@ -4,27 +4,55 @@ CIM::CIM(BUS * bus) {
 	this->bus = bus;
 	if (SDL_Init(SDL_INIT_JOYSTICK) < 0)
 		std::cout << "couldn't initialize controller handler" << std::endl;
-	//Set texture filtering to linear
-    if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
-    {
-        printf( "Warning: Linear texture filtering not enabled!" );
-    }
 
     //Check for joysticks
-    if( SDL_NumJoysticks() < 1 )
-    {
-        printf( "Warning: No joysticks connected!\n" );
-    }
-    else
-    {
+    num_controllers = SDL_NumJoysticks();
+    if (num_controllers > 0) {
         //Load joystick
-        SDL_Joystick * gGameController = SDL_JoystickOpen( 0 );
-        if( gGameController == NULL )
-        {
+        controller1 = SDL_GameControllerOpen( 0 );
+        if( controller1 == NULL ) {
             printf( "Warning: Unable to open game controller! SDL Error: %s\n", SDL_GetError() );
         }
     }
 
+}
+
+void CIM::newController() {
+	switch ( num_controllers ) {
+		case 0:
+			controller1 = SDL_GameControllerOpen( 0 );
+	        if( controller1 == NULL ) {
+	            printf( "Warning: Unable to open game controller! SDL Error: %s\n", SDL_GetError() );
+	        }
+		break;
+	}
+}
+
+void CIM::closeController() {
+	SDL_GameControllerClose(controller1);
+}
+
+void CIM::handleJoyAxis(SDL_Event e) {
+	if (!e.jaxis.axis) {
+		if (e.jaxis.value > 25000)
+			bus->pressRt();
+		else if (e.jaxis.value < -25000)
+			bus->pressLt();
+		else {
+			bus->releaseLt();
+			bus->releaseRt();
+		}
+	}
+	else {
+		if (e.jaxis.value > 25000)
+			bus->pressDn();
+		else if (e.jaxis.value < -25000)
+			bus->pressUp();
+		else {
+			bus->releaseUp();
+			bus->releaseDn();
+		}
+	}
 }
 
 
