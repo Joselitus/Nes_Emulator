@@ -104,8 +104,9 @@ void ROM::reset() {
 }
 
 void ROM::save() {
-	CMM1 * cmm1mapper = (CMM1*)mapper;
-	cmm1mapper->save();
+	if(CMM1 * cmm1mapper = dynamic_cast<CMM1*>(mapper)) {
+    	cmm1mapper->save();
+	}	
 }
 
 void ROM::asignMapper() {
