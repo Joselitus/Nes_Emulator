@@ -1,4 +1,5 @@
 #include "ROM.h"
+#include <iostream>
 
 ROM::ROM() {
 
@@ -83,7 +84,10 @@ bool ROM::load(std::string filename) {
 	size_t size = lseek(file, 0, SEEK_END);
 	lseek(file, 0, SEEK_SET);
 	uint8_t * buff = new uint8_t[size];
-	read(file, buff, size);
+	if (!read(file, buff, size)) {
+		std::cout << "[ERROR] Unable to read file" << std::endl;
+		exit(EXIT_FAILURE); 
+	}
 	if ( (parsed_ok = parseHeader(buff)) ) {
 		asignMapper();
 		memcpy(prg, buff+HEADER_SIZE+contains_trainer*TRAINER_SIZE, prg_size);

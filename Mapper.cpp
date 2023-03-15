@@ -146,7 +146,10 @@ void CMM1::save() {
 	int file;
 	if ((file = open(savename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR)) < 0)
 		return;
-	write(file, memory, 8*1024);
+	if (!write(file, memory, 8*1024)) {
+		std::cout << "[ERROR] unable to write to file: " << savename << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
 void CMM1::loadSave() {
@@ -154,7 +157,10 @@ void CMM1::loadSave() {
 	int file;
 	if ((file = open(savename.c_str(), O_RDONLY)) < 0)
 		return;
-	read(file, memory, 8*1024);
+	if (!read(file, memory, 8*1024)) {
+		std::cout << "[ERROR] unable to write to file: " << savename << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
 // Mapper 2 ------------------------------------------
