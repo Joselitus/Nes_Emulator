@@ -220,7 +220,7 @@ private:
 
 	uint8_t length_table[4*8];
 
-	double time_per_sample = 0.70/(double)FREQUENCY;
+	double time_per_sample = 1/(double)FREQUENCY;
 	double time_per_ppu_cycle = 1.0/5369318.0;
 	double elapsed;
 	int counter;
