@@ -5,6 +5,8 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 
+#include "Icon.h"
+
 class Display
 {
 private:

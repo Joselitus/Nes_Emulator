@@ -11,6 +11,8 @@ Display::Display(int width, int height, int pixel_size) {
          exit( EXIT_FAILURE );
      }
     window =  SDL_CreateWindow("bingle", 0, 0, width*pixel_size, height*pixel_size, 0);
+    SDL_Surface * icon = SDL_LoadBMP_RW(SDL_RWFromMem((void * )iconnes_bmp, 258790), 1);
+    SDL_SetWindowIcon(window, icon);
     surface = SDL_GetWindowSurface(window);
 }
 
