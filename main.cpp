@@ -1,5 +1,8 @@
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include<sys/wait.h>
+#include <fstream>
+#include <sys/wait.h>
 #include <fcntl.h>
 
 using namespace std;
@@ -11,7 +14,14 @@ using namespace std;
 
 #define DW 256
 #define DH 240
-#define PS 4
+
+#define SETTINGS "settings.st"
+
+#define PS "PS"
+#define DEFAULT_PS 4
+
+#define VOLUME "VOLUME"
+#define DEFAULT_VOLUME 1000
 
 // Giving samples for the audio stream
 void audio_callback(void *userdata, Uint8 *_stream, int _length)
@@ -28,12 +38,28 @@ int main(int argc, char const *argv[])
 		exit( EXIT_FAILURE );
 	}
 
+	int pixel_size = DEFAULT_PS;
+	int volume = DEFAULT_VOLUME;
+	char * token;
+	ifstream infile(SETTINGS);
+	for( std::string settings_line; getline(infile, settings_line );) {
+		token = strtok((char*)settings_line.c_str(), ":");
+		if (!token) continue;
+		if (!strcmp(token, PS)) {
+			pixel_size = atoi(strtok(NULL, ":"));
+		}
+		if (!strcmp(token, VOLUME)) {
+			volume = atoi(strtok(NULL, ":"));
+		}
+	}
+
+
 	ROM * rom = new ROM();
 	if ( !rom->load(std::string(argv[1])) )
 		exit(EXIT_FAILURE);
-	Display * dis = new Display(DW, DH, PS);
+	Display * dis = new Display(DW, DH, pixel_size);
 	PPU * ppu = new PPU(dis);
-	APU * apu = new APU();
+	APU * apu = new APU(volume);
 	BUS * bus = new BUS(ppu, apu, rom);
 	CPU * cpu = new CPU(bus);
 	CIM * cim = new CIM(bus);
@@ -67,13 +93,23 @@ int main(int argc, char const *argv[])
 				if( e.type == SDL_QUIT ) end = 1;
 
 				if ( e.type == SDL_KEYDOWN ) {
-					if (e.key.keysym.scancode == SDL_SCANCODE_R) {
+					switch (e.key.keysym.scancode) {
+					
+					case (SDL_SCANCODE_R):
 						cpu->reset();
 						ppu->reset();
 						rom->reset();
-					}
-					else
+						break;
+					case (SDL_SCANCODE_V):
+						apu->amplitude += 100;
+						break;
+					case (SDL_SCANCODE_B):
+						apu->amplitude -= 100;
+						if(apu->amplitude < 0) apu->amplitude = 0;
+						break;
+					default:
 						cim->handlePress(e);
+					}
 				}
 				if ( e.type == SDL_KEYUP ) {
 					cim->handleRelease(e);

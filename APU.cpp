@@ -1,6 +1,7 @@
 #include "APU.h"
 
-APU::APU() {
+APU::APU(int volume) {
+	amplitude = volume;
 	elapsed = 0.0;
 	counter = 0;
 	buffer_read = buffer_write = 0;
@@ -219,7 +220,7 @@ void APU::generateSample() {
 				a += -apsin(c)/j;
 				b += -apsin(c-p*j)/j;
 			}
-			pulseval += AMPLITUDE*seq->getAmp()*(2.0/PI)*(a-b);
+			pulseval += amplitude*seq->getAmp()*(2.0/PI)*(a-b);
 		}
 		else pulseval += 0.0;
 		seq = pulse2_seq;
@@ -233,7 +234,7 @@ void APU::generateSample() {
 			float n = 2*i + 1;
 			a += (1/(n*n))*apsin(2.0*PI*n*v/FREQUENCY) * (i%2 ? -1 : 1);
 		}
-		trival = AMPLITUDE*(8.0/(PI*PI))*a;
+		trival = amplitude*(8.0/(PI*PI))*a;
 	}
 	else trival = 0.0;
 	

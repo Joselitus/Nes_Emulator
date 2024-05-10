@@ -7,7 +7,6 @@
 #include <functional>
 #include <SDL2/SDL.h>
 
-#define AMPLITUDE 1000
 #define FREQUENCY 44100
 #define PI 3.141592653589793
 #define BUFFER_SIZE 14
@@ -217,7 +216,6 @@ public:
 class APU
 {
 private:
-
 	uint8_t length_table[4*8];
 
 	double time_per_sample = 1/(double)FREQUENCY;
@@ -238,7 +236,9 @@ private:
 	Sequencer * triang_seq;
 
 public:
-	APU();
+	int amplitude;
+
+	APU(int volume);
 	~APU();
 	void tick();
 	void write(uint16_t addr, uint8_t data);
