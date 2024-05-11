@@ -100,10 +100,10 @@ int main(int argc, char const *argv[])
 						ppu->reset();
 						rom->reset();
 						break;
-					case (SDL_SCANCODE_V):
+					case (SDL_SCANCODE_K):
 						apu->amplitude += 100;
 						break;
-					case (SDL_SCANCODE_B):
+					case (SDL_SCANCODE_J):
 						apu->amplitude -= 100;
 						if(apu->amplitude < 0) apu->amplitude = 0;
 						break;
